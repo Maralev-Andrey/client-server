@@ -26,8 +26,9 @@ class ClientProtocol(asyncio.Protocol):
                 if self.check_login(tmp_login):
                     self.login = tmp_login
                     self.transport.write(f"Привет, {self.login}!".encode())
-                    for message in self.send_history():
-                        self.transport.write(f"\n{message}".encode())
+                    if len(self.send_history()) > 1:
+                        for message in self.send_history():
+                            self.transport.write(f"\n{message}".encode())
         else:
             self.send_message(decoded)
 
@@ -38,10 +39,10 @@ class ClientProtocol(asyncio.Protocol):
         now_time = datetime.datetime.now().strftime("%H:%M %d-%m-%Y")
         format_string = f"{now_time} {format_string}"
         
-        if len(self.send_history()) < 10:
+        if len(self.send_history()) < 11:
             self.server.history.append(format_string)
         else:
-            self.server.history.pop(0)
+            self.server.history.pop(1)
             self.server.history.append(format_string)
 
         for client in self.server.clients:
@@ -77,7 +78,7 @@ class Server:
 
     def __init__(self):
         self.clients = []
-        self.history = []
+        self.history = ["Последние сообщения чата:"]
 
     def create_protocol(self):
         return ClientProtocol(self)
