@@ -1,6 +1,7 @@
 """
 Серверное приложение для соединений
 """
+import datetime
 import asyncio
 from asyncio import transports
 
@@ -33,7 +34,10 @@ class ClientProtocol(asyncio.Protocol):
     def send_message(self, message):
         format_string = f"<{self.login}> {message}"
         encoded = format_string.encode()
-
+        
+        now_time = datetime.datetime.now().strftime("%H:%M %d-%m-%Y")
+        format_string = f"{now_time} {format_string}"
+        
         if len(self.send_history()) < 10:
             self.server.history.append(format_string)
         else:
